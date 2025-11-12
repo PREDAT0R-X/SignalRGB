@@ -3,7 +3,6 @@
   <meta
     description="Rotates a line from the center of the canvas, much like the free Radar RGB effect. This version has a gradient between the foreground and background to ensure smooth transitions between colours. Original: https://github.com/stronk-dev/SignalRGB_Effects"
   />
-  <meta publisher="Raruu" />
   <meta
     property="bg"
     label="Background Colour"
@@ -43,6 +42,14 @@
     default="100"
   />
   <meta
+    property="targetFPS"
+    label="Target FPS"
+    type="number"
+    min="15"
+    max="144"
+    default="60"
+  />
+  <meta
     property="rotMode"
     label="Rotation"
     type="combobox"
@@ -75,6 +82,8 @@
   var l = -1;
   var reverse = false;
   var lastTime = performance.now();
+  var frameInterval = 1000 / 60; // Default to 60 FPS
+  var lastFrameTime = performance.now();
 
   function SetReverse() {
     if (!reverse) reverse = true;
@@ -124,6 +133,19 @@
   }
 
   function update(currentTime) {
+    // Update frame interval based on target FPS
+    frameInterval = 1000 / targetFPS;
+    
+    // Check if enough time has passed for the next frame
+    var timeSinceLastFrame = currentTime - lastFrameTime;
+    if (timeSinceLastFrame < frameInterval) {
+      window.requestAnimationFrame(update);
+      return;
+    }
+    
+    // Update last frame time, accounting for any drift
+    lastFrameTime = currentTime - (timeSinceLastFrame % frameInterval);
+    
     // Calculate delta time for frame-independent animation
     var deltaTime = (currentTime - lastTime) / 1000; // Convert to seconds
     lastTime = currentTime;
